@@ -3,8 +3,6 @@ FROM phusion/passenger-full:0.9.11
 # Set correct environment variables.
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
-ENV MYSQL_HOST localhost
-ENV NGINX_SERVERNAME localhost
 
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
@@ -24,13 +22,10 @@ RUN rm -f /etc/service/nginx/down
 RUN rm -rf /etc/nginx/sites-enabled/default
 
 ADD build/webapp.conf /etc/nginx/sites-enabled/webapp.conf
-RUN sed -i -e "s/server_name localhost;/server_name $NGINX_SERVERNAME;/g" /etc/nginx/sites-enabled/webapp.conf
 
 RUN wget -P /tmp http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.2.7/phpMyAdmin-4.2.7-all-languages.zip
 RUN unzip /tmp/phpMyAdmin-4.2.7-all-languages.zip -d /tmp/
 RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/config.sample.inc.php /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
-
-RUN sed -i -e "s/localhost/$MYSQL_HOST/g" /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
 
 RUN mkdir -p /home/app/webapp/public
 RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/* /home/app/webapp/public/
@@ -38,6 +33,9 @@ RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/* /home/app/webapp/public/
 RUN mkdir           /etc/service/phpfpm
 ADD runit/phpfpm.sh /etc/service/phpfpm/run
 RUN chmod +x        /etc/service/phpfpm/run
+
+ADD my_init.d/99_phpmyadmin_setup.sh /etc/my_init.d/99_phpmyadmin_setup.sh
+RUN chmod +x /etc/my_init.d/99_phpmyadmin_setup.sh
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
