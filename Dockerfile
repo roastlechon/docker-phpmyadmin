@@ -10,7 +10,7 @@ ENV NGINX_SERVERNAME localhost
 CMD ["/sbin/my_init"]
 
 RUN apt-get update
-RUN apt-get install -y build-essential python-software-properties unzip
+RUN apt-get install -y build-essential python-software-properties unzip wget
 RUN apt-get install -y php5-cli php5-fpm php5-mysql php5-pgsql php5-sqlite php5-curl php5-gd php5-mcrypt php5-intl php5-imap php5-tidy
 
 RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/fpm/php.ini
@@ -23,20 +23,20 @@ RUN rm -f /etc/service/nginx/down
 
 RUN rm -rf /etc/nginx/sites-enabled/default
 
-ADD nginx/webapp.conf /etc/nginx/sites-enabled/webapp.conf
+ADD build/webapp.conf /etc/nginx/sites-enabled/webapp.conf
 RUN sed -i -e "s/server_name localhost;/server_name $NGINX_SERVERNAME;/g" /etc/nginx/sites-enabled/webapp.conf
 
 RUN wget -P /tmp http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.2.7/phpMyAdmin-4.2.7-all-languages.zip
 RUN unzip /tmp/phpMyAdmin-4.2.7-all-languages.zip -d /tmp/
 RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/config.sample.inc.php /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
 
-RUN sed -i -e "s/ = 'localhost'/ = '$MYSQL_HOST'/g" /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
+RUN sed -i -e "s/localhost/$MYSQL_HOST/g" /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
 
 RUN mkdir -p /home/app/webapp/public
-RUN mv /tmp/phpMyAdmin-4.2.7-all-languages /home/app/webapp/public
+RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/* /home/app/webapp/public/
 
 RUN mkdir           /etc/service/phpfpm
-ADD phpfpm/phpfpm.sh /etc/service/phpfpm/run
+ADD runit/phpfpm.sh /etc/service/phpfpm/run
 RUN chmod +x        /etc/service/phpfpm/run
 
 # Clean up APT when done.
