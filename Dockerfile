@@ -23,12 +23,12 @@ RUN rm -rf /etc/nginx/sites-enabled/default
 
 ADD build/webapp.conf /etc/nginx/sites-enabled/webapp.conf
 
-RUN wget -P /tmp http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.2.7/phpMyAdmin-4.2.7-all-languages.zip
-RUN unzip /tmp/phpMyAdmin-4.2.7-all-languages.zip -d /tmp/
-RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/config.sample.inc.php /tmp/phpMyAdmin-4.2.7-all-languages/config.inc.php
+RUN wget -P /tmp https://files.phpmyadmin.net/phpMyAdmin/4.5.0.2/phpMyAdmin-4.5.0.2-all-languages.zip
+RUN unzip /tmp/phpMyAdmin-4.5.0.2-all-languages.zip -d /tmp/
+RUN mv /tmp/phpMyAdmin-4.5.0.2-all-languages/config.sample.inc.php /tmp/phpMyAdmin-4.5.0.2-all-languages/config.inc.php
 
 RUN mkdir -p /home/app/webapp/public
-RUN mv /tmp/phpMyAdmin-4.2.7-all-languages/* /home/app/webapp/public/
+RUN mv /tmp/phpMyAdmin-4.5.0.2-all-languages/* /home/app/webapp/public/
 
 RUN mkdir           /etc/service/phpfpm
 ADD runit/phpfpm.sh /etc/service/phpfpm/run
